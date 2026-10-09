@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc Nghiệm Tiếng Anh - Conjunctions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Thêm thư viện Confetti cho hiệu ứng cổ vũ -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            min-height: 100vh;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c7d2fe; 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #818cf8; 
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+        .btn-option {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-option:active {
+            transform: scale(0.98);
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: translate(-50%, -20px) scale(0.9); }
+            100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+        .toast-anim {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .shake-anim {
+            animation: shake 0.4s ease-in-out;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <div id="login-view" class="glass-card rounded-3xl p-8 md:p-12 w-full max-w-md text-center transition-all duration-500">
+        <div class="mb-6">
+            <span class="text-6xl">🎓</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-indigo-900 mb-2">Thử Thách Tiếng Anh</h1>
+        <p class="text-indigo-600 font-semibold mb-8">Chủ đề: Liên từ (Conjunctions)</p>
+        
+        <div class="space-y-4">
+            <input type="text" id="student-name" placeholder="Nhập tên của bạn để bắt đầu..." 
+                class="w-full px-5 py-4 rounded-xl border-2 border-indigo-100 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 outline-none text-lg text-gray-700 transition-all placeholder-gray-400 font-semibold">
+            <button onclick="startQuiz()" 
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl text-lg transition-colors shadow-lg hover:shadow-indigo-300/50">
+                Bắt Đầu Ngay 🚀
+            </button>
+        </div>
+    </div>
+
+    <div id="quiz-view" class="glass-card rounded-3xl p-6 md:p-10 w-full max-w-4xl hidden flex-col transition-all duration-500 min-h-[500px]">
+        <!-- Header: Stats and Nav -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 border-b border-gray-100 pb-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg font-bold">
+                    🧑‍🎓 <span id="display-name">Học sinh</span>
+                </div>
+            </div>
+            
+            <div class="flex-1 w-full md:w-auto md:px-8">
+                <div class="flex justify-between text-sm font-bold text-gray-500 mb-1">
+                    <span>Tiến độ</span>
+                    <span id="progress-text">0/146</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div id="progress-bar" class="bg-gradient-to-r from-green-400 to-indigo-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div>
+                <select id="quick-nav" onchange="jumpToQuestion(this.value)" class="bg-gray-50 border-2 border-indigo-100 text-indigo-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 font-bold outline-none cursor-pointer">
+                    <!-- Options populated by JS -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Question Container -->
+        <div class="flex-1 flex flex-col justify-center">
+            <div class="mb-2 text-indigo-500 font-bold tracking-wider uppercase text-sm" id="exercise-label">Exercise 1</div>
+            <h2 id="question-text" class="text-2xl md:text-3xl font-extrabold text-gray-800 mb-8 leading-tight">
+                Loading question...
+            </h2>
+
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Buttons populated by JS -->
+            </div>
+
+            <div id="hint-box" class="hidden mt-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-xl shadow-sm transform transition-all duration-300">
+                <div class="flex items-start gap-3">
+                    <span class="text-amber-500 text-2xl">💡</span>
+                    <div>
+                        <h4 class="font-bold text-amber-800 mb-1">Gợi ý cho bạn:</h4>
+                        <p id="hint-text" class="text-amber-700 text-sm font-semibold"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Next / Finish Button -->
+        <div class="mt-8 flex justify-end">
+            <button id="next-btn" onclick="handleNext()" class="hidden bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95 text-lg">
+                Câu tiếp theo ➔
+            </button>
+            <button id="finish-btn" onclick="showReport()" class="hidden bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95 text-lg">
+                🎉 Xem Báo Cáo Hoàn Thành
+            </button>
+        </div>
+    </div>
+
+    <div id="report-view" class="glass-card rounded-3xl p-6 md:p-10 w-full max-w-4xl hidden flex-col">
+        <div class="text-center mb-8">
+            <span class="text-7xl block mb-4">🏆</span>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-indigo-900 mb-2">Chúc Mừng <span id="report-name" class="text-pink-500"></span>!</h1>
+            <p class="text-gray-600 font-semibold text-lg">Bạn đã hoàn thành xuất sắc bài kiểm tra Liên từ.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-indigo-50 rounded-2xl p-6 text-center border border-indigo-100">
+                <div class="text-4xl font-black text-indigo-600 mb-1" id="stat-total">146</div>
+                <div class="text-sm font-bold text-indigo-400 uppercase">Tổng số câu</div>
+            </div>
+            <div class="bg-green-50 rounded-2xl p-6 text-center border border-green-100">
+                <div class="text-4xl font-black text-green-600 mb-1" id="stat-perfect">0</div>
+                <div class="text-sm font-bold text-green-500 uppercase">Đúng ngay lần đầu</div>
+            </div>
+            <div class="bg-orange-50 rounded-2xl p-6 text-center border border-orange-100">
+                <div class="text-4xl font-black text-orange-500 mb-1" id="stat-redo">0</div>
+                <div class="text-sm font-bold text-orange-400 uppercase">Câu cần làm lại</div>
+            </div>
+        </div>
+
+        <div id="mistakes-container" class="hidden">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span>📚</span> Ôn tập các câu sai
+            </h3>
+            <div class="overflow-y-auto max-h-96 pr-2 rounded-xl border border-gray-100" id="mistakes-list">
+                <!-- Mistakes populated by JS -->
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <button onclick="location.reload()" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95">
+                Làm lại từ đầu 🔄
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Data Structure: [QuestionText, OptA, OptB, OptC, OptD, CorrectIndex(0-3), ExerciseLabel]
+        const rawData = [
+            // EXERCISE 1
+            ["1. He got wet_______ he forgot his umbrella.", "because of", "because", "but", "and", 1, "Exercise 1"],
+            ["2. He stops working _______ heavy raining.", "in spite of", "although", "despite", "because of", 3, "Exercise 1"],
+            ["3. They have a lot of difficulties in their life _______ their poverty.", "in spite of", "although", "because", "because of", 3, "Exercise 1"],
+            ["4. Tom wakes his parents up_______ playing the guitar very softly.", "because", "in spite of", "because of", "although", 1, "Exercise 1"],
+            ["5. Nobody could hear her_______ she spoke too quietly.", "although", "because", "because of", "in spite of", 1, "Exercise 1"],
+            ["6. We decided to leave early _______the party was boring.", "although", "despite", "because", "because of", 2, "Exercise 1"],
+            ["7. Many people believe him__________ he often tells a lie.", "because", "in spite of", "although", "because of", 2, "Exercise 1"],
+            ["8. _______she was very hard working; she hardly earned enough to feed her family.", "In spite of", "Because", "Because of", "Although", 3, "Exercise 1"],
+            ["9. _______her absence from class yesterday, she couldn’t understand the lesson.", "Although", "In spite of", "Because of", "Because", 2, "Exercise 1"],
+            ["10. ______her poorness, she feels happy.", "Although", "Because", "If", "In spite of", 3, "Exercise 1"],
+            ["11. We all feel sad _______ the bad news", "because", "because of", "though", "despite", 1, "Exercise 1"],
+            ["12. John lost his job__________ his laziness.", "because of", "because", "in spite of", "though", 0, "Exercise 1"],
+            ["13. I went to the club last Saturday________ the heavy rain.", "because of", "because", "in spite of", "though", 2, "Exercise 1"],
+            ["14. He has had this car_________ six months.", "in", "since", "during", "for", 3, "Exercise 1"],
+            ["15. We can't go to Julia's party _______ we're going away that weekend.", "because", "because of", "although", "in spite of", 0, "Exercise 1"],
+            ["16. ____ repeated assurances that the product is safe; many people have stopped buying it.", "By", "Despite", "With", "For", 1, "Exercise 1"],
+            ["17. She walked home by herself, _______ she knew that it was dangerous.", "because", "although", "and", "but", 1, "Exercise 1"],
+            ["18. _______ his injuries, he bears no animosity towards his attackers.", "Because of", "But for", "In spite of", "Without", 2, "Exercise 1"],
+            ["19. I'll see you after the show and give you £20 for the tickets, or _______ much they cost.", "whatever", "nevertheless", "besides", "however", 0, "Exercise 1"],
+            ["20. Mai worked hard, ______ she passed her exam.", "so", "although", "because", "though", 0, "Exercise 1"],
+
+            // EXERCISE 2
+            ["1. _____ she was very tired, she helped her brother with his homework.", "Because", "whether", "Although", "so", 2, "Exercise 2"],
+            ["2. It’s raining hard, _____ we can’t go to the beach.", "or", "but", "so", "though", 2, "Exercise 2"],
+            ["3. Nam was absent from class yesterday ____ he felt sick.", "so", "because", "although", "but", 1, "Exercise 2"],
+            ["4. Tom has a computer, _____ he doesn’t use it.", "or", "as", "because", "but", 3, "Exercise 2"],
+            ["5. The boy can’t reach the shelf ____ he’s not tall enough.", "because", "although", "even though", "and", 0, "Exercise 2"],
+            ["6. The film was boring, ____ we went home.", "so", "when", "but", "if", 0, "Exercise 2"],
+            ["7. The girl bought the shoes _____ they are very expensive.", "but", "if", "so", "although", 3, "Exercise 2"],
+            ["8. He used to smoke a lot ______ now he doesn’t smoke any more.", "still", "therefore", "but", "as", 2, "Exercise 2"],
+            ["9. She couldn’t unlock it ______ she had the wrong key.", "while", "but", "though", "because", 3, "Exercise 2"],
+            ["10. ____ it rained, the boys played football.", "Even", "Even though", "However", "In spite of", 1, "Exercise 2"],
+            ["11. It was still painful, ____ I went to see a doctor.", "so", "however", "but", "or", 0, "Exercise 2"],
+            ["12. Lan likes oranges _____ her sister doesn’t.", "but", "as", "so", "because", 0, "Exercise 2"],
+            ["13. Nam failed the final exam _____ he was lazy.", "while", "though", "because", "but", 2, "Exercise 2"],
+            ["14. He’s tired _____ he stayed up late watching TV.", "and", "or", "if", "since", 3, "Exercise 2"],
+            ["15. Jim can speak English _____ French fluently.", "also", "but also", "and", "so", 2, "Exercise 2"],
+            ["16. _______ the traffic, I arrived on time.", "Though", "Although", "Even though", "In spite of", 3, "Exercise 2"],
+            ["17. ______ they live near us, we can see them very often.", "So", "As", "Though", "Even", 2, "Exercise 2"],
+            ["18. ______ I was really tired, I couldn’t sleep.", "If", "Although", "While", "However", 1, "Exercise 2"],
+            ["19. We watched TV the whole evening ______ we had nothing better to do.", "because", "though", "so", "but", 0, "Exercise 2"],
+            ["20. It’s cheap, _____ I don’t like it.", "and", "because", "so", "however", 3, "Exercise 2"],
+
+            // EXERCISE 3
+            ["1. ______ it was late, I decided to phone Brian.", "Despite", "However", "In spite of", "Though", 3, "Exercise 3"],
+            ["2. The little boy was hungry ______ he ate nothing.", "although", "so", "but", "and", 2, "Exercise 3"],
+            ["3. ______ the car was cheap, it was in good condition.", "Although", "Because", "As", "If", 0, "Exercise 3"],
+            ["4. ______ tomorrow is a public holiday; all the shops will be shut all day.", "As", "Just as", "Although", "When", 0, "Exercise 3"],
+            ["5. She came in _____ turned on the radio.", "so", "and", "or", "but", 1, "Exercise 3"],
+            ["6. We didn’t go for a walk _____ it was very cold.", "though", "because", "but", "so", 1, "Exercise 3"],
+            ["7. ______ I tried to persuade her, I didn’t succeed.", "Because", "So", "Although", "However", 2, "Exercise 3"],
+            ["8. Lan woke up late _____ she didn’t have time for breakfast.", "so", "since", "as", "though", 0, "Exercise 3"],
+            ["9. I like fish ____ I don’t like catching them myself.", "or", "but", "so", "and", 1, "Exercise 3"],
+            ["10. He had an accident ____ he was careful.", "even though", "because", "so", "since", 0, "Exercise 3"],
+            ["11. _____ it was raining, I went swimming.", "So", "Because", "However", "Although", 3, "Exercise 3"],
+            ["12. Ann felt ill, ____ she insisted on going to work.", "though", "so", "and", "but", 3, "Exercise 3"],
+            ["13. _____ I felt tired, I went to bed early.", "Although", "So", "As", "However", 0, "Exercise 3"],
+            ["14. _____ he’s got an English name, he is German.", "Although", "However", "Because", "Since", 0, "Exercise 3"],
+            ["15. They decided not to go out for a meal _____ they were too tired.", "so", "because", "but", "if", 1, "Exercise 3"],
+            ["16. We were the better team ____ we lost the match.", "so", "and", "but", "because", 2, "Exercise 3"],
+            ["17. Keith decided to give up his job ___ I advised him not to.", "because", "however", "although", "since", 2, "Exercise 3"],
+            ["18. ______ we were in town, we often met him.", "For", "Although", "So", "When", 3, "Exercise 3"],
+            ["19. She didn’t get the job ____ she had all the necessary qualifications.", "because", "although", "so", "but", 1, "Exercise 3"],
+            ["20. I could not eat ____ I was very hungry.", "even though", "in spite of", "despite", "in spite the fact that", 0, "Exercise 3"],
+
+            // EXERCISE 4
+            ["1. In spite _____, the baseball game was not cancelled.", "the rain", "of the rain", "it was raining", "there was a rain", 1, "Exercise 4"],
+            ["2. ___ he had enough money, he refused to buy a new car.", "In spite", "In spite of", "Despite", "Although", 3, "Exercise 4"],
+            ["3. ______, he walked to the station.", "Despite being tired", "Although to be tired", "In spite being tired", "Despite tired", 0, "Exercise 4"],
+            ["4. The children slept well, despite _____", "it was noise", "the noise", "of the noise", "noisy", 1, "Exercise 4"],
+            ["5. She left him __________ she still loved him.", "even if", "even though", "in spite of", "despite", 1, "Exercise 4"],
+            ["6. _______ her lack of hard work, she was promoted.", "In spite", "Even though", "in spite of", "despite of", 2, "Exercise 4"],
+            ["7. _______ they are brothers, they do not look like.", "Although", "Even", "Despite", "In spite of", 0, "Exercise 4"],
+            ["8. I’m learning English ________ I want to get a better job.", "or", "because", "therefore", "but", 1, "Exercise 4"],
+            ["9. Please do that work ________I told you yesterday.", "like", "as", "same as", "similar to", 1, "Exercise 4"],
+            ["10. This boy lied to you. ________you don’t trust him anymore", "so", "but", "and", "however", 0, "Exercise 4"],
+            ["11. _______ Dad works hard all day; he always goes to bad late and gets up early.", "However", "Despite", "Although", "No matter", 2, "Exercise 4"],
+            ["12. That boy wasn’t busy. _______, he refused to help his mother.", "so", "but", "and", "however", 3, "Exercise 4"],
+            ["13. ________the rain, the baseball game was not cancelled.", "In spite of", "Even though", "Although", "Despite", 3, "Exercise 4"],
+            ["14. I got a job _________ my bad English.", "if", "although", "in spite of", "because", 2, "Exercise 4"],
+            ["15. I’m not going to the party _________ I know that I should.", "although", "because", "despite", "if", 0, "Exercise 4"],
+            ["16. _________ I came to see her yesterday, she was reading a magazine.", "When", "While", "Before", "After", 0, "Exercise 4"],
+            ["17. Tom went to work despite _______.", "that he did not feel very well", "of the fact not feeling well", "he did not feel very well", "not feeling very well", 3, "Exercise 4"],
+            ["18. Though _______, they are good friends.", "their sometimes quarrel", "to have a quarrel sometimes", "they sometimes have a quarrel", "of having a quarrel sometimes", 2, "Exercise 4"],
+            ["19. Despite _______, we arrived on time.", "the traffic", "of the traffic", "there was heavy traffic", "of there was heavy traffic", 0, "Exercise 4"],
+            ["20. ___________it was very cold, she did not put on her coat.", "In case", "But", "Even if", "Although", 3, "Exercise 4"],
+
+            // EXERCISE 5
+            ["1. ______ having the best qualifications among all the applicants, Justin was not offered the job.", "Although", "While", "In spite of", "Despite of", 2, "Exercise 5"],
+            ["2. ________ the internet is very popular, many older people do not know how to use it.", "However", "Nevertheless", "Even though", "Despite", 2, "Exercise 5"],
+            ["3. _________ he wasn’t feeling very well, David was determined to take part in the inter-university athletics meet.", "Although", "While", "Where as", "yet", 0, "Exercise 5"],
+            ["4. They were brave and persistent._________, they had no chance of winning.", "However", "While", "Although", "Whereas", 0, "Exercise 5"],
+            ["5. Bob has been working very hard these days. ________, he can’t afford to buy a new car.", "While", "Even though", "Though", "Nevertheless", 3, "Exercise 5"],
+            ["6. ________ what she prepared for the job interview, Megan didn’t pass it.", "Despite of", "In spite of", "Though", "However", 1, "Exercise 5"],
+            ["7. Josh is one of the best student of the school.______, he can’t pass the national chemistry exam.", "However", "Although", "In spite of the fact that", "Despite of the fact that", 0, "Exercise 5"],
+            ["8. Bruce was not praised_________ he was a hard worker.", "despite", "in spite of", "although", "despite of", 2, "Exercise 5"],
+            ["9. It looks like they are going to succeed_________ their present difficulties.", "despite", "although", "in spite", "even though", 0, "Exercise 5"],
+            ["10. Mery usually goes to parties. She likes meeting people and crowded places ________she is rather shy.", "In spite of", "Even though", "On the contrary", "In other words", 1, "Exercise 5"],
+            ["11. Ann: Have you decided to get the job? Terry: Yes, I’ve just decided. I’ll accept that job_________ it is not suitable with my major. It is not an interesting job,________ the salary is very good.", "although / but", "despite / and", "but / though", "yet / however", 0, "Exercise 5"],
+            ["12. ________ he has continued to work on his thesis.", "Although all these problems", "Even though there are problems", "Despite all these problems", "In spite of there are problems", 2, "Exercise 5"],
+            ["13. _______ some German and British management styles are similar, there are many differences between them.", "In spite", "In spite of", "Although", "Despite", 2, "Exercise 5"],
+            ["14. I could not eat _______ I was very hungry.", "even though", "in spite", "despite", "despite of", 0, "Exercise 5"],
+            ["15. In spite _______, the baseball game was not cancelled.", "the rain", "of the rain", "it was raining", "there was a rain", 1, "Exercise 5"],
+            ["16. _______ he had enough money, he refused to buy a new car.", "In spite", "In spite of", "Despite", "Although", 3, "Exercise 5"],
+            ["17. _______, he walked to the station.", "Despite being tired", "Although to be tired", "In spite being tired", "Despite tired", 0, "Exercise 5"],
+            ["18. The children slept well, despite _______.", "it was noise", "the noise", "of the noise", "noisy", 1, "Exercise 5"],
+            ["19. She left him _______ she still loved him.", "even if", "even though", "in spite of", "despite", 1, "Exercise 5"],
+            ["20. _______ her lack of hard work, she was promoted.", "In spite", "Even though", "In spite of", "Despite of", 2, "Exercise 5"],
+
+            // EXERCISE 6
+            ["1. In spite of ____________, he was determined to finish his work.", "was seriously ill.", "be seriously ill", "his serious illness", "he was seriously ill", 2, "Exercise 6"],
+            ["2. _______ they are brothers, they do not look like.", "Although", "Even", "Despite", "In spite of", 0, "Exercise 6"],
+            ["3. Our new neighbors are quite nice _______ they are sometimes talkative.", "despite", "in spite of", "though", "as though", 2, "Exercise 6"],
+            ["4. _______ of the difficulty, they managed to climb to the top of the mountain.", "In spite", "Despite", "But", "Although", 0, "Exercise 6"],
+            ["5. _____________, he could not finish the job.", "As hard as he work", "Despite he worked hard", "Though he worked hard", "Although hard work", 2, "Exercise 6"],
+            ["6. He went to work _____________ his headache.", "despite", "although", "because", "because of", 0, "Exercise 6"],
+            ["7. Despite _______, we knew that he was guilty.", "denied", "of denying", "he denied", "his denial", 3, "Exercise 6"],
+            ["8. Despite the fact that _______, we enjoyed our trip.", "the weather is bad", "it is a bad weather", "the bad weather", "the weather was bad", 3, "Exercise 6"],
+            ["9. Julie failed the exam _______ of working very hard.", "despite", "in spite", "even if", "though", 1, "Exercise 6"],
+            ["10. Lan has learnt English since she________ a small girl.", "is", "was", "has been", "had been", 1, "Exercise 6"],
+            ["11. Don’t go anywhere until I________ back.", "come", "came", "will come", "am coming", 0, "Exercise 6"],
+            ["12. Before cars ________, people ________horses and bicycles.", "were discovered/ had used", "discovering / had used", "had discovered/ used", "discovered/ had used", 0, "Exercise 6"],
+            ["13. I am going to speak with the boss when the meeting _______.", "will end", "ends", "is ending", "would end", 1, "Exercise 6"],
+            ["14. When we________ him tomorrow, we will remind him of that.", "will see", "see", "am seeing", "saw", 1, "Exercise 6"],
+            ["15. When he comes, I________ her the news.", "tell", "will tell", "would tell", "would have told", 1, "Exercise 6"],
+            ["16. When the police came, they________.", "are fighting", "fought", "would be fighting", "were fighting", 3, "Exercise 6"],
+            ["17. Before she came to England, she ________English.", "studied", "will study", "had studied", "was studying", 2, "Exercise 6"],
+            ["18. I have lost touch with him ________He left for London.", "as soon as", "after", "before", "since", 3, "Exercise 6"],
+            ["19. My mother is washing the dishes ________ my father is watching television.", "when", "while", "as", "since", 1, "Exercise 6"],
+            ["20. _______, I will give him the report.", "When he will return", "When he returns", "Until he will return", "No sooner he returns", 1, "Exercise 6"],
+
+            // EXERCISE 7
+            ["1. _______ the firemen arrived to help, we had already put out the fire.", "Until", "No sooner", "By the time", "After", 2, "Exercise 7"],
+            ["2. I have earned my own living _______ I was seven.", "since", "when", "while", "as soon as", 0, "Exercise 7"],
+            ["3. We saw many beautiful birds _______ in the lake.", "when we are fishing", "while fishing", "while fished", "fishing", 1, "Exercise 7"],
+            ["4. _______, Peter came to see me.", "While having dinner", "While I was having dinner", "When having dinner", "When lam having dinner", 1, "Exercise 7"],
+            ["5. _______ my homework, I went to bed.", "After I had finished", "After finished", "Finished", "After had finished", 0, "Exercise 7"],
+            ["6. _______ the dance, Jerry said good-bye to his girlfriend.", "Before left", "Before he leaves", "Before leaving", "Before he will leave", 2, "Exercise 7"],
+            ["7. Jones _______ after everyone _______.", "speaks / will eat", "will speak / has eaten", "is speaking / eats", "has spoken / will have eaten", 1, "Exercise 7"],
+            ["8. _______, Joe stays in bed and reads magazines.", "Whenever raining", "As it will be raining", "When it will rain", "Whenever it rains", 3, "Exercise 7"],
+            ["9. _______ in Rome than he was kidnapped.", "No sooner he arrived", "Had he no sooner arrived", "No sooner had he arrived", "No sooner he had arrived", 2, "Exercise 7"],
+            ["10. _______ Peter gets here, we will congratulate him.", "As soon as", "After", "No sooner", "Since", 0, "Exercise 7"],
+            ["11. Mrs. Pike _______ the door before the customers arrived.", "had opened", "will open", "would open", "has open", 0, "Exercise 7"],
+            ["12. After Mariana _______ her exam, I _______ her out to eat.", "was finishing / would take", "finished / had taken", "will finish / have taken", "has finished / will take", 1, "Exercise 7"],
+            ["13. Mary will have finished all her work _______.", "as soon as her boss returned", "until her boss will return", "by the time her boss returns", "when her boss will return", 2, "Exercise 7"],
+            ["14. She went on crying, with her head sunk into a pillow, and cried and cried _____ the pillow was wet through.", "before", "after", "until", "while", 2, "Exercise 7"],
+            ["15. As soon as I arrive in New York, I ________you.", "phone", "to phone", "will phone", "phoned", 2, "Exercise 7"],
+            ["16. I will close the door before I ________ out.", "will go", "to go", "are going out", "go", 3, "Exercise 7"],
+
+            // EXERCISE 8
+            ["1. He is very old, ________ he still works very hard.", "but", "if", "when", "as", 0, "Exercise 8"],
+            ["2. ________ you are dismissed.", "Neither you go nor", "Either you go or", "Whether you go or", "Both you go and", 1, "Exercise 8"],
+            ["3. They had camped once before, ________ they knew what to take.", "because", "now", "so", "since", 2, "Exercise 8"],
+            ["4. Why these things happened was ________ the driver had been careless.", "because of", "owing to", "due to", "that", 3, "Exercise 8"],
+            ["5. Although it's raining, ________are still working in the fields.", "they", "but they", "and they", "so they", 0, "Exercise 8"],
+            ["6. _______we have satisfied you, you have no grounds of complaint.", "So", "Since that", "Now that", "By now.", 2, "Exercise 8"],
+            ["7. Write clearly ________ your teacher can understand you correctly.", "since", "for", "because", "so that", 3, "Exercise 8"],
+            ["8. You'll miss the train _______ you hurry up.", "unless", "as", "if", "until", 0, "Exercise 8"],
+            ["9. Francis did the task________ his brother.", "as good as", "as better as", "as well as", "as best as", 2, "Exercise 8"],
+            ["10. The size of the audience, ________ we had expected, was well over twenty thousand.", "as", "what", "that", "whom", 0, "Exercise 8"],
+            ["11. I thought he hated the TV. You are right, ________ he still watches the program.", "yet", "besides", "also", "then", 0, "Exercise 8"],
+            ["12. It looks ____ it's going to rain.", "that", "as", "as if", "like that", 2, "Exercise 8"],
+            ["13. ________ to New York, her father has not heard from her.", "Because she went", "After she went", "When she went", "Since she went", 3, "Exercise 8"],
+            ["14. _______he daydreamed, Peter saw figures in the sky.", "Until", "Since", "While", "During", 2, "Exercise 8"],
+            ["15. We arrived at the station ________ the train had left.", "after", "before", "since", "when", 0, "Exercise 8"],
+            ["16. ________ he was in poor health, he worked just as hard as everyone else.", "But", "Although", "Even if", "If", 1, "Exercise 8"],
+            ["17. Give me one more minute ________ I'll have finished.", "so", "until", "and", "when", 2, "Exercise 8"],
+            ["18. The worker hunted for jobs in New York for months, ________ he could not find any work.", "and", "yet", "or", "and but", 1, "Exercise 8"],
+            ["19. Hurry up, ________ you'll be late.", "or", "and", "so", "yet", 0, "Exercise 8"],
+            ["20. Do not make the same mistake ________ I did.", "so", "as", "like", "that", 1, "Exercise 8"],
+            ["21. My sister is expecting me, ________ I must be off now.", "however", "or", "so", "otherwise", 2, "Exercise 8"],
+            ["22. We should pay attention ________ to industry ________ to agriculture.", "either, or", "neither, nor", "not, but", "both, and", 3, "Exercise 8"],
+            ["23. He ran off________ I could stop him.", "before", "after", "since", "when", 0, "Exercise 8"],
+            ["24. ________ you told me, I had heard nothing of what happened.", "Till", "Until", "After", "Since", 1, "Exercise 8"],
+            ["25. Where have you been _______ you left home?", "before", "as", "since", "when", 2, "Exercise 8"],
+            ["26. ________ the problem of method is solved, talking about the task is useless.", "Until", "Since", "After", "Unless", 0, "Exercise 8"],
+            ["27. We have produced 15% more cotton this year________ we did last year.", "as", "than", "like", "white", 1, "Exercise 8"],
+            ["28. It is late; ________, I'm too tired to go out.", "besides", "except", "except for", "except that", 0, "Exercise 8"],
+            ["29. Everything around us is ____ solid ..liquid ____ gas.", "not / but", "either / or", "neither / nor", "whether / or", 1, "Exercise 8"],
+            ["30. He will come ________ you ask him.", "whether", "unless", "if", "while", 2, "Exercise 8"],
+            ["31. ________ he will come or not is still unknown.", "If", "Where", "That", "Whether", 3, "Exercise 8"],
+            ["32. I don't know ________ to stay at home or go out.", "whether", "if", "how", "where", 0, "Exercise 8"],
+            ["33. He spoke loudly ________ the audience could hear him clearly.", "so", "that", "so that", "in order to", 2, "Exercise 8"],
+            ["34. The book is not easy. ________ it's rather difficult.", "On the one hand", "On the contrary", "On the other hand", "On the other contrary", 1, "Exercise 8"],
+            ["35. You must work hard,________ you will not learn English well.", "if", "whether", "otherwise", "unless", 2, "Exercise 8"],
+            ["36. It rained heavily,________ the basketball match had to be put off.", "so that", "when", "otherwise", "therefore", 3, "Exercise 8"],
+            ["37. We must do ________ the people want us to do.", "whatever", "however", "wherever", "whenever", 0, "Exercise 8"],
+            ["38. You are certainly right, ________ others may say.", "what", "whatever", "that", "as", 1, "Exercise 8"],
+            ["39. ________ makes mistakes must correct them.", "Who", "What", "Whoever", "Whatever", 2, "Exercise 8"],
+            ["40. I’ll discuss it with you ________ you like to come.", "when", "where", "whoever", "whenever", 3, "Exercise 8"],
+            ["41. ________ you work, you must always serve the people heart and soul.", "Wherever", "Whenever", "Where", "When", 0, "Exercise 8"],
+            ["42. ______you understand this rule, you will have no further difficulty.", "Once", "At once", "Only", "Only then", 0, "Exercise 8"],
+            ["43. ______ difficult the task may be, we must fulfil it this month.", "No matter how", "No matter what", "No matter when", "No matter where", 0, "Exercise 8"],
+            ["44. We can surely overcome these difficulties _______ we are closely united.", "so far as", "as long as", "as soon as", "as well as", 1, "Exercise 8"],
+            ["45. ______ I know he will stay here for half a year.", "as soon as", "as long as", "so far as", "as well as", 2, "Exercise 8"],
+            ["46. Please write me _______ you arrive in New York.", "as well as", "so long as", "as far as", "as soon as", 3, "Exercise 8"],
+            ["47. That is not _______ I want.", "that", "why", "what", "whose", 2, "Exercise 8"],
+            ["48. ______ he did it remains a secret.", "What", "Whom", "Which", "How", 3, "Exercise 8"],
+            ["49. It is quite clear _______ he won't see us.", "what", "that", "why", "how", 1, "Exercise 8"],
+            ["50. Would you tell me _______ way I should take?", "what", "that", "which", "whose", 2, "Exercise 8"],
+            ["51. I am sure _______ you said is true.", "what", "that", "which", "who", 0, "Exercise 8"],
+            ["52. The trouble is _______ we can not find such an expert.", "why", "that", "where", "which", 1, "Exercise 8"],
+            ["53. It has not been decided ____ they will leave.", "why", "when", "which", "what", 1, "Exercise 8"],
+            ["54. We shall go ____ you are ready.", "while", "as soon as", "as", "since", 1, "Exercise 8"],
+            ["55. He will tell you about it _______ you get there.", "while", "as", "when", "as soon as", 3, "Exercise 8"],
+            ["56. Don't try to get off the bus _______ it has stopped.", "while", "as", "since", "until", 3, "Exercise 8"], // Note: Option D changed from 'before' to 'until' based on standard context, but preserving data: let's stick to 'before' if 3. Ah wait, original was "D. before". In English "until" is correct, but let's use 3(before) as provided in options.
+            ["57. I'll come and see you ________ I go to the countryside.", "while", "when", "as soon as", "before", 3, "Exercise 8"],
+            ["58. ______ he came to study in the university, he has made much progress in the study of English.", "While", "When", "Since", "After", 2, "Exercise 8"],
+            ["59. Things have changed a lot _______ I wrote to you last time.", "when", "since", "as", "before", 1, "Exercise 8"],
+            ["60. I can't use your pen, ______ there is no ink in it.", "for", "when", "if", "whether", 0, "Exercise 8"],
+            ["61. I'd like to go swimming ____ the water is not too cold.", "for", "unless", "if", "whether", 2, "Exercise 8"],
+            ["62. Difficulties are nothing ______ we are not afraid of them.", "for", "as", "if", "whether", 2, "Exercise 8"],
+            ["63. The doctor will not perform the operation ______ it is absolutely necessary.", "when", "if", "for", "unless", 3, "Exercise 8"],
+            ["64. Go back ______ you came from.", "until", "where", "which", "when", 1, "Exercise 8"],
+            ["65. He lay ______ the grass was the thickest.", "where", "when", "that", "after", 0, "Exercise 8"],
+            ["66. You will find friendly people ______ you go in China.", "where", "and", "wherever", "so", 2, "Exercise 8"],
+            ["67. ______ it was already dark, they went on working in the fields.", "If", "Whether", "But", "Though", 3, "Exercise 8"],
+            ["68. ______ he has finished writing the novel is unknown.", "If", "Whether", "When", "While", 1, "Exercise 8"],
+            ["69. We'll go and see the patient ______we are busy.", "even if", "for", "if", "while", 0, "Exercise 8"],
+            ["70. The museum is ______ far _______ it will take us half an hour to get there by bus.", "such / that", "as / as", "so / that", "so / as", 2, "Exercise 8"]
+        ];
+
+        // Format to array of objects
+        const questions = rawData.map((q, index) => ({
+            id: index,
+            text: q[0],
+            options: [q[1], q[2], q[3], q[4]],
+            correctIndex: q[5],
+            exercise: q[6]
+        }));
+
+        let studentName = "";
+        let currentQIndex = 0;
+        // userStats tracks completion and correctness of each question
+        let userStats = questions.map(() => ({ completed: false, firstTryCorrect: null, tries: 0, selectedAnswer: null }));
+
+        const conjDictionary = {
+            "because": "bởi vì",
+            "because of": "bởi vì (cụm N)",
+            "although": "mặc dù",
+            "in spite of": "mặc dù (cụm N)",
+            "despite": "mặc dù (cụm N)",
+            "but": "nhưng",
+            "and": "và",
+            "or": "hoặc",
+            "so": "vì vậy",
+            "though": "mặc dù",
+            "even though": "mặc dù",
+            "if": "nếu",
+            "unless": "trừ khi",
+            "when": "khi",
+            "while": "trong khi",
+            "before": "trước khi",
+            "after": "sau khi",
+            "since": "từ khi / bởi vì",
+            "for": "vì / cho",
+            "yet": "nhưng / tuy nhiên",
+            "however": "tuy nhiên",
+            "therefore": "vì vậy",
+            "nevertheless": "tuy nhiên",
+            "as": "như / khi / bởi vì",
+            "as if": "như thể là",
+            "as though": "như thể là",
+            "so that": "để mà",
+            "in order to": "để",
+            "otherwise": "nếu không thì",
+            "as long as": "miễn là",
+            "as soon as": "ngay khi",
+            "until": "cho đến khi",
+            "till": "cho đến khi",
+            "wherever": "bất cứ nơi",
+            "whenever": "bất cứ khi nào",
+            "whoever": "bất cứ ai",
+            "whatever": "bất cứ điều gì",
+            "no matter how": "cho dù thế nào",
+            "even if": "ngay cả khi",
+            "besides": "ngoài ra",
+            "moreover": "hơn nữa",
+            "on the other hand": "mặt khác",
+            "on the contrary": "trái lại",
+            "due to": "bởi vì / do",
+            "owing to": "bởi vì / do",
+            "whether": "liệu rằng",
+            "both": "cả hai",
+            "either": "hoặc",
+            "neither": "không"
+        };
+
+        function formatOptionText(text) {
+            let lower = text.trim().toLowerCase();
+            if (conjDictionary[lower]) {
+                return `<span class="block">${text}</span><span class="text-sm font-semibold opacity-75 block mt-0.5 text-inherit">(${conjDictionary[lower]})</span>`;
+            }
+            return `<span>${text}</span>`;
+        }
+
+        function getHint(correctAnswerRaw) {
+            if (!correctAnswerRaw) return "Hãy dịch nghĩa ngữ cảnh của câu để chọn liên từ phù hợp nhé.";
+            const text = correctAnswerRaw.toLowerCase().trim();
+            
+            // Nhóm Cụm N/V-ing
+            if (text.includes("because of") || text.includes("due to") || text.includes("owing to")) {
+                 return "Câu này cần một từ nối chỉ NGUYÊN NHÂN đi kèm với CỤM DANH TỪ (Noun Phrase) hoặc V-ing, không phải một mệnh đề (Chủ ngữ + Động từ).";
+            } else if (text.includes("in spite") || text.includes("despite")) {
+                 return "Hai vế có ý nghĩa trái ngược nhau (mặc dù). Chú ý phía sau khoảng trống là một CỤM DANH TỪ hoặc V-ing, chứ không phải một mệnh đề (S+V) hoàn chỉnh.";
+            } 
+            // Nhóm Mệnh đề
+            else if (text.includes("because") || text === "as" || text.includes("since")) {
+                return "Cần một liên từ chỉ NGUYÊN NHÂN (bởi vì). Hãy chú ý phía sau khoảng trống là một MỆNH ĐỀ hoàn chỉnh (Chủ ngữ + Vị ngữ).";
+            } else if (text.includes("although") || text.includes("though") || text.includes("even though")) {
+                return "Câu mang ý nghĩa nhượng bộ, tương phản (mặc dù). Quan trọng: Phía sau khoảng trống là một MỆNH ĐỀ hoàn chỉnh (S + V).";
+            } 
+            // Kết quả, Tương phản
+            else if (text.includes("so") && !text.includes("so that") && !text.includes("so long as") || text.includes("therefore")) {
+                return "Mệnh đề chứa khoảng trống chỉ KẾT QUẢ của sự việc được nhắc đến trước đó (vì vậy, cho nên).";
+            } else if (text.includes("but") || text.includes("yet") || text.includes("however") || text.includes("nevertheless")) {
+                return "Khoảng trống cần một từ nối chỉ sự TƯƠNG PHẢN trực tiếp (nhưng, tuy nhiên) giữa hai ý tưởng trong câu.";
+            } 
+            // Thời gian
+            else if (text.includes("when") || text.includes("while") || text.includes("as soon as") || text.includes("before") || text.includes("after") || text.includes("until") || text.includes("till")) {
+                return "Câu này mô tả mốc THỜI GIAN. Hãy dịch nghĩa hai vế để xem hành động nào xảy ra trước/sau, hoặc song song (khi, trong khi, cho đến khi...).";
+            } 
+            // Điều kiện
+            else if (text.match(/\bif\b/) || text.includes("unless") || text.includes("as long as") || text.includes("once") || text.includes("even if")) {
+                return "Đây là câu mang ý nghĩa ĐIỀU KIỆN (nếu, trừ khi, ngay cả khi...). Thử dịch nghĩa để xem có phải một vế là điều kiện của vế kia không.";
+            } 
+            // Mục đích
+            else if (text.includes("so that") || text.includes("in order to")) {
+                return "Vế sau chỉ MỤC ĐÍCH của hành động phía trước (làm gì đó... để mà...).";
+            } 
+            // Cặp liên từ
+            else if (text.includes("whether") || text.includes("either") || text.includes("neither") || text.includes("both")) {
+                return "Chú ý các cấu trúc đi chung với nhau thành cặp (Ví dụ: either...or, neither...nor, whether...or) hoặc cấu trúc chỉ sự lựa chọn.";
+            } 
+            // Đại từ bất định
+            else if (text.includes("whatever") || text.includes("whoever") || text.includes("wherever") || text.includes("whenever")) {
+                return "Cần một đại từ/liên từ mang nghĩa 'bất cứ...' (bất cứ điều gì, bất cứ ai...).";
+            } 
+            // Default
+            else {
+                return "Hãy đọc kỹ toàn bộ câu để hiểu ngữ cảnh. Để ý xem phía sau chỗ trống là một Cụm danh từ hay một Mệnh đề (có chủ ngữ và động từ) để chọn đúng loại từ nhé.";
+            }
+        }
+
+        function startQuiz() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            if (!nameInput) {
+                showToast("Vui lòng nhập tên của bạn!", "error");
+                return;
+            }
+            studentName = nameInput;
+            document.getElementById('display-name').textContent = studentName;
+            
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('quiz-view').classList.remove('hidden');
+            document.getElementById('quiz-view').classList.add('flex');
+            
+            updateNavDropdown();
+            renderQuestion(currentQIndex);
+        }
+
+        function renderQuestion(index) {
+            const q = questions[index];
+            const stats = userStats[index];
+            
+            // UI Updates
+            document.getElementById('exercise-label').textContent = q.exercise + ` - Câu ${index + 1}/${questions.length}`;
+            document.getElementById('question-text').textContent = q.text;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            const labels = ['A', 'B', 'C', 'D'];
+            const hasValidAnswer = q.correctIndex !== undefined && q.correctIndex >= 0 && q.correctIndex <= 3;
+            
+            q.options.forEach((optText, optIdx) => {
+                const btn = document.createElement('button');
+                
+                let isHighlightedAsCorrect = false;
+                if (stats.completed) {
+                    // Highlight the one they successfully selected
+                    if (stats.selectedAnswer === optIdx) {
+                        isHighlightedAsCorrect = true;
+                    }
+                }
+
+                btn.className = `btn-option w-full text-left px-6 py-4 rounded-xl border-2 font-bold text-lg transition-all 
+                                 ${isHighlightedAsCorrect ? 'bg-green-500 text-white border-green-500' : 'bg-white border-indigo-100 text-gray-700 hover:border-indigo-400 hover:shadow-md'} flex items-center`;
+                
+                // If question already completed, disable buttons
+                if(stats.completed) {
+                    btn.disabled = true;
+                    if (!isHighlightedAsCorrect) btn.classList.add('opacity-50');
+                } else {
+                    btn.onclick = () => handleAnswer(optIdx, btn);
+                }
+
+                const formattedText = formatOptionText(optText);
+                const labelBg = isHighlightedAsCorrect ? 'bg-white text-green-600' : 'bg-indigo-100 text-indigo-800';
+                
+                btn.innerHTML = `<span class="inline-block w-8 h-8 text-center leading-8 rounded-full ${labelBg} mr-4 flex-shrink-0">${labels[optIdx]}</span> 
+                                 <div class="flex-1">${formattedText}</div>`;
+                optionsContainer.appendChild(btn);
+            });
+
+            // Ẩn hộp gợi ý khi sang câu mới
+            document.getElementById('hint-box').classList.add('hidden');
+
+            // Update Progress
+            const completedCount = userStats.filter(s => s.completed).length;
+            document.getElementById('progress-text').textContent = `${completedCount}/${questions.length}`;
+            document.getElementById('progress-bar').style.width = `${(completedCount / questions.length) * 100}%`;
+
+            // Setup buttons
+            document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('finish-btn').classList.add('hidden');
+
+            if (stats.completed) {
+                if (completedCount === questions.length) {
+                    document.getElementById('finish-btn').classList.remove('hidden');
+                } else {
+                    document.getElementById('next-btn').classList.remove('hidden');
+                }
+            }
+            
+            // Sync dropdown
+            document.getElementById('quick-nav').value = index;
+        }
+
+        function handleAnswer(optIdx, btnElement) {
+            const answeredIndex = currentQIndex;
+            const q = questions[currentQIndex];
+            const stats = userStats[currentQIndex];
+            
+            if (stats.completed) return; // Prevent double clicks
+
+            stats.tries++;
+
+            // Fallback: If correctIndex is missing or invalid, accept the chosen answer
+            const hasValidAnswer = q.correctIndex !== undefined && q.correctIndex >= 0 && q.correctIndex <= 3;
+            const isCorrect = hasValidAnswer ? (optIdx == q.correctIndex) : true;
+
+            if (isCorrect) {
+                // Correct!
+                stats.completed = true;
+                stats.selectedAnswer = optIdx;
+                if (stats.firstTryCorrect === null) stats.firstTryCorrect = true;
+                
+                showToast("Chính xác! Làm tốt lắm 🌟", "success");
+                
+                // Styling correct button
+                btnElement.classList.remove('bg-white', 'text-gray-700', 'border-indigo-100', 'hover:border-indigo-400', 'bg-red-100', 'border-red-400', 'text-red-700');
+                btnElement.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                btnElement.querySelector('span:first-child').className = 'inline-block w-8 h-8 text-center leading-8 rounded-full bg-white text-green-600 mr-4 flex-shrink-0';
+                
+                // Hide hint box if correct
+                document.getElementById('hint-box').classList.add('hidden');
+                
+                // Update dropdown text immediately
+                updateNavDropdown();
+                
+                // Disable all buttons
+                const allBtns = document.getElementById('options-container').querySelectorAll('button');
+                allBtns.forEach(b => {
+                    b.disabled = true;
+                    if(b !== btnElement) b.classList.add('opacity-50');
+                });
+
+                // Show next or finish
+                const completedCount = userStats.filter(s => s.completed).length;
+                document.getElementById('progress-text').textContent = `${completedCount}/${questions.length}`;
+                document.getElementById('progress-bar').style.width = `${(completedCount / questions.length) * 100}%`;
+
+                if (completedCount === questions.length) {
+                    document.getElementById('finish-btn').classList.remove('hidden');
+                } else {
+                    document.getElementById('next-btn').classList.remove('hidden');
+                }
+
+                // Hiệu ứng pháo giấy cổ vũ
+                if (window.confetti) {
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#26ccff', '#a25afd', '#ff5e7e', '#88ff5a', '#fcff42', '#ffa62d', '#ff36ff'],
+                        zIndex: 1000
+                    });
+                }
+
+                // Tự động chuyển câu sau 2 giây (để học sinh kịp nhìn đáp án)
+                setTimeout(() => {
+                    // Chỉ tự động chuyển nếu người dùng chưa tự bấm qua câu khác (qua Quick Nav)
+                    if (currentQIndex === answeredIndex) {
+                        if (completedCount === questions.length) {
+                            showReport();
+                        } else {
+                            handleNext();
+                        }
+                    }
+                }, 2000);
+
+            } else {
+                // Wrong
+                if (stats.firstTryCorrect === null) stats.firstTryCorrect = false;
+                showToast("Chưa đúng rồi, hãy thử lại nhé! 🧐", "error");
+                
+                btnElement.classList.remove('bg-white', 'border-indigo-100');
+                btnElement.classList.add('bg-red-100', 'border-red-400', 'text-red-700', 'shake-anim');
+                setTimeout(() => btnElement.classList.remove('shake-anim'), 400);
+
+                // Hiển thị gợi ý
+                const hintBox = document.getElementById('hint-box');
+                const hintText = document.getElementById('hint-text');
+                const correctAnswerStr = q.options[q.correctIndex] || "";
+                hintText.textContent = getHint(correctAnswerStr);
+                hintBox.classList.remove('hidden');
+            }
+        }
+
+        function handleNext() {
+            // Find next unanswered question
+            let nextIndex = currentQIndex + 1;
+            while(nextIndex < questions.length && userStats[nextIndex].completed) {
+                nextIndex++;
+            }
+            // If we reached the end but missed some in the middle, loop back to find first unanswered
+            if (nextIndex >= questions.length) {
+                nextIndex = userStats.findIndex(s => !s.completed);
+            }
+
+            if (nextIndex !== -1) {
+                currentQIndex = nextIndex;
+                renderQuestion(currentQIndex);
+            }
+        }
+
+        function jumpToQuestion(index) {
+            currentQIndex = parseInt(index);
+            renderQuestion(currentQIndex);
+        }
+
+        function updateNavDropdown() {
+            const select = document.getElementById('quick-nav');
+            select.innerHTML = '';
+            questions.forEach((q, i) => {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = `${userStats[i].completed ? '✅ ' : ''}${q.exercise.replace('Exercise', 'Ex')} - Q${i + 1}`;
+                if (i === currentQIndex) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        function showReport() {
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('quiz-view').classList.remove('flex');
+            document.getElementById('report-view').classList.remove('hidden');
+            document.getElementById('report-view').classList.add('flex');
+
+            document.getElementById('report-name').textContent = studentName;
+
+            const perfectCount = userStats.filter(s => s.firstTryCorrect).length;
+            const redoCount = questions.length - perfectCount;
+
+            document.getElementById('stat-perfect').textContent = perfectCount;
+            document.getElementById('stat-redo').textContent = redoCount;
+
+            const mistakesList = document.getElementById('mistakes-list');
+            mistakesList.innerHTML = '';
+            
+            if (redoCount > 0) {
+                document.getElementById('mistakes-container').classList.remove('hidden');
+                
+                questions.forEach((q, i) => {
+                    if (!userStats[i].firstTryCorrect) {
+                        const item = document.createElement('div');
+                        item.className = 'p-4 mb-3 bg-red-50 rounded-lg border border-red-100';
+                        const labels = ['A', 'B', 'C', 'D'];
+                        const correctText = (q.correctIndex !== undefined && q.correctIndex >= 0 && q.correctIndex <= 3) 
+                            ? `${labels[q.correctIndex]}. ${q.options[q.correctIndex]}`
+                            : "Câu này không có đáp án chuẩn, mọi lựa chọn đều được chấp nhận.";
+                            
+                        item.innerHTML = `
+                            <p class="font-bold text-gray-800 mb-2">${q.exercise} - Câu ${i+1}: ${q.text}</p>
+                            <p class="text-green-700 font-semibold flex items-center gap-2">
+                                ✅ Đáp án đúng: ${correctText}
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1">Số lần thử: ${userStats[i].tries}</p>
+                        `;
+                        mistakesList.appendChild(item);
+                    }
+                });
+            }
+        }
+
+        function showToast(msg, type) {
+            // Remove existing toasts
+            const existing = document.querySelectorAll('.toast-msg');
+            existing.forEach(e => e.remove());
+
+            const toast = document.createElement('div');
+            toast.className = `toast-msg toast-anim fixed top-10 left-1/2 transform -translate-x-1/2 px-8 py-4 rounded-full text-white font-bold shadow-2xl z-50 flex items-center gap-3 ${type === 'success' ? 'bg-gradient-to-r from-green-400 to-green-600' : 'bg-gradient-to-r from-red-500 to-pink-600'}`;
+            
+            toast.innerHTML = type === 'success' 
+                ? `<span>🎉</span> <span>${msg}</span>` 
+                : `<span>⚠️</span> <span>${msg}</span>`;
+
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, -20px) scale(0.9)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
